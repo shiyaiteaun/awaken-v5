@@ -1,0 +1,64 @@
+---
+title: 'Debugging dnd-kit: Both DragOverlay and Draggable Item dragging'
+date: '2024-08-08'
+authors: ['ychris']
+localeid: '2024-08-02_dnd-kit-container-drag'
+summary: "Dragging with DragOverlay caused original item to drag as well, making the parent/container scroll when dragging outside container"
+tags: ['degugging', 'code']
+---
+
+<b>SOLUTION</b>: Do not use `transform` variable from `useDraggable`.
+
+In hindsight this was a really dumb mistake, but it's plagued me for a while.
+
+This is actually written in the docs, but not super clearly.
+
+> Depending on your use-case, you may want to use a drag overlay rather than transforming the original draggable source element that is connected to the useDraggable hook:
+
+Key point being:
+<b>"rather than transforming the original draggable source element"</b>
+
+Under the [drag overlay section](https://docs.dndkit.com/api-documentation/draggable/drag-overlay), shows an example of using Draggable.tsx with DragOverlay:
+
+```tsx
+import React from 'react';
+import {useDraggable} from '@dnd-kit/core';
+
+function Draggable(props) {
+  const {attributes, listeners, setNodeRef} = useDraggable({
+    id: props.id,
+  });
+
+  return (
+    <li ref={setNodeRef} {...listeners} {...attributes}>
+      {props.children}
+    </li>
+  );
+}
+```
+
+This is the original example under [the general draggable section](https://docs.dndkit.com/api-documentation/draggable), that I now know does NOT work with DragOverlay:
+
+```tsx
+import {useDraggable} from '@dnd-kit/core';
+import {CSS} from '@dnd-kit/utilities';
+
+
+function Draggable() {
+  const {attributes, listeners, setNodeRef, transform} = useDraggable({
+    id: 'unique-id',
+  });
+  const style = {
+    transform: CSS.Translate.toString(transform),
+  };
+
+  return (
+    <button ref={setNodeRef} style={style} {...listeners} {...attributes}>
+      /* Render whatever you like within */
+    </button>
+  );
+}
+```
+
+### Lessons learned
+- If it doesn't work for you, but it works in the demo, then look at the code for the demo, and spot the differences.

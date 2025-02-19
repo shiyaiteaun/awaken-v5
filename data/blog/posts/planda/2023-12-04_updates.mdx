@@ -1,0 +1,19 @@
+---
+title: 'Planda updates - Dec. 4'
+date: '2023-12-04'
+authors: ['ychris']
+localeid: '2023-12-04_updates'
+summary: 'New feature highlight: panda animations on task completion'
+tags: ['planda', 'updates']
+---
+
+### New feature highlight: panda animations on task completion
+When you complete a task, you get a 1/3 chance of having a panda animation show up for ~5 seconds, and a 1/5 chance of confetti.
+
+Currently this is really simple, using lottie for panda animations, useContext to make it show, and Framer motion for entrance/exit animations. Confetti is done with react-confetti-explosion. I want to put it out there for a bit, and get some feedback on how users like it, before I add more animations + fun transitions.
+
+Michele suggested that there should be a tiny chance of a really crazy entrance animation, where the panda flies all over the screen. I think that will be fun. I also need to add a section in the settings that allow you to disable these animations, as I don't want them to feel intrusive.
+
+### Other
+- Fix dark mode for heat map
+- Allow toggling color theme on about page

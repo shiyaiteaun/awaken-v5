@@ -1,0 +1,55 @@
+---
+title: 'Handling AWS Crons using Local Dates with EventCronParser'
+date: '2023-11-30'
+authors: ['ychris']
+localeid: '2023-11-30_local-cron'
+summary: 'Convert UTC dates to local dates, and back to UTC for storage and usage on the server-side.'
+tags: ['event-cron-parser', 'cron', 'aws']
+---
+
+[AWS Cron/Rate Expression specs](https://docs.aws.amazon.com/systems-manager/latest/userguide/reference-cron-and-rate-expressions.html)
+
+## UTC to local. Local back to UTC.
+Crons are typically stored in UTC. Since I deploy Planda through ECS, and ECS uses UTC, my crons need to work with UTC. However, the dates displayed to users must be local dates, and users need to be able to edit these cron dates.
+
+The challenge is to convert UTC dates to local dates, so my users can view these dates and make changes. Then, I have to take these changes, and convert them back into UTC for storage and usage on the server-side.
+
+## Some methods of EventCronParser
+`desc()`: Returns a description of your cron, described using local time.
+
+`next(from?: Date | number)`: Returns the next date after `from`, or the date after the date returned by the previous function call to `next()`, if no parameter is supplied.
+
+`range(start: Date | number, end: Date | number)`: Returns all cron dates within the range given.
+
+### Example: Days of the week with forms
+
+```js
+import EventCronParser from 'event-cron-parser'
+
+const cronParser = new EventCronParser("0 7 ? * MON,WED,FRI *")
+const localDaysOfWeek = cronParser.getLocalDays()
+
+// Show users localDaysOfWeek, and allow them to make changes.
+const editedLocalDaysOfWeek = ...
+
+cronParser.setDaysOfWeek(editedLocalDaysOfWeek)
+// Voila! The UTC cron has now been adjusted according to the local dates given.
+
+// Return the new cron with:
+const adjustedCron = cronParser.getCron()
+```
+
+## Further functionalities
+##### Durations
+`EventCronParser` can also store durations, and can therefore return all event dates that occur sometime during given interval with `range(start: Date | number, end: Date | number, inclusive?: boolean)`, when `inclusive=true`. If only events fully contained in this interval are wanted, set `inclusive=false` (default).
+
+##### AWS rate expressions
+`EventCronParser` doesn't only handle crons – it can also handle AWS rate expressions. Just pass a rate expression in, and we will detect it automatically.
+
+```js
+const rateParser = new EventCronParser("rate(1 day)")
+const nextDate = rateParser.next(Date.now())
+```
+
+##### Cron/Rate expression validation
+Calling `validate()` will throw an error if the cron or rate expression is invalid. Invalid crons are allowed to be passed into `EventCronParser` for cron/rate building purposes, but should be validated before being usage.

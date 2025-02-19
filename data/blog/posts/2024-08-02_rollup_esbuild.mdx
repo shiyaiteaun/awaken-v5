@@ -1,0 +1,135 @@
+---
+title: 'XY problem - Debugging spiral with Rollup and esbuild'
+date: '2024-08-02'
+authors: ['ychris']
+localeid: '2024-08-02_rollup_esbuild'
+summary: "Removing reliance on next-transpile-modules sent me deep into bundler debugging"
+tags: ['mistakes', 'degugging', 'code']
+---
+
+I do this way too often:
+1. I have a problem
+1. I think of a solution
+1. The solution doesn't work
+1. I try a fix for the solution
+1. The fix doesn't work
+1. I try a fix for the fix
+1. The fix for the fix doesn't work
+1. and on it goes, until I've completely lost track of what the original problem was.
+
+Here is my latest example of this.
+
+### Problem
+I was trying to remove reliance of `next-transpile-modules` for my component library `@planda/design-system`, since Next.js's dev speed was way too slow (20-30s start up speed), so I had to use turbo.
+Turbo didn't work with next-transpile-modules, so I had to remove it.
+I'm pretty sure something is really wrong with my Next.js build, I'll be focusing on fixing the speed issues next.
+
+### 1. Inital look at the problem
+Here's some context:
+- I had been using Rollup to bundle my package, and it was working fine.
+- I'm on an old version of Rollup, and I've had issues with it before. I previously tried upgrading the version and didn't manage to get it to work.
+- I have very little understanding on bundlers and how they work.
+- I've used esbuild before, and had a great experience with it. That was for an AWS lambda function in Typescript.
+
+Since I didn't know how to do the `next-transpile-modules` part during the rollup build, for some reason I thought I should switch to esbuild.
+
+### 2. Type errors
+- I needed declaration files for my package, which I realized would be included if I set `noEmit` to `false` in my `tsconfig.json` file.
+- I had a lot of type errors in my project, which I ignored before since Rollup built anyway.
+- I needed to fix all of these in order to get those `.d.ts` files from running `tsc`
+- At first I was getting errors from `node_modules/next/...`, which was odd since this was a devDependency, and `node_modules` was excluded in my `tsconfig.json` file.
+- Doing `tsx --explainFiles` made be realize that the `node_modules/next` was being included because the `next-env.d.ts` file.
+- I excluded `next-env.d.ts` in `tsconfig.json`, but then got more errors that I solved from upgrading `typescript`. However, the reason I was on an older version of `typescript` was because `stitches` didn't work with the newer version.
+- I found something on the Github issue for the `stitches` problem that I never saw before: there was actually a fix, but it was in the `canary` version of `stitches`.
+- I installed the canary version, had to fix a few more types, including dealing with this [Github issue](https://github.com/radix-ui/primitives/issues/2309)
+- Had more type errors, which I fixed by upgrading `@types/react`, `@types/react-dom`, and `@types/node`
+- Now all my type errors were resolved. The next step was getting esbuild to work...
+
+### 3. esbuild config
+- Below was my (initial) esbuild config. I failed to get it to work due to CSS modules.
+```js
+const esbuild = require('esbuild');
+const { nodeExternalsPlugin } = require('esbuild-node-externals');
+const { dependencies, peerDependencies } = require('./package.json');
+const react18Plugin = require('esbuild-plugin-react18');
+const esbuildPluginTsc = require('esbuild-plugin-tsc');
+const CssModulesPlugin = require('esbuild-css-modules-plugin');
+
+esbuild
+  .build({
+    entryPoints: ['src/index.ts'],
+    outdir: 'dist',
+    bundle: true,
+    minify: false,
+    treeShaking: true,
+    // sourcemap: true,
+    format: 'esm',
+    target: ['es6'],
+    loader: {
+      '.module.css': 'local-css',
+    },
+    plugins: [
+      CssModulesPlugin({}),
+      nodeExternalsPlugin(),
+      react18Plugin(),
+      // esbuildPluginTsc({ tsx: true }),
+    ],
+    external: [].concat.apply(
+      [],
+      [Object.keys(dependencies || {}), Object.keys(peerDependencies || {})]
+    ),
+  })
+  .then(async (result) => {
+    console.log('Build complete');
+  })
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+```
+- At first, esbuild would always remove my singular `.module.css` file, and throw an error due to the missing import.
+- I tried adding a loader like the docs say, but it was still excluding the file.
+- I used the `esbuild-css-modules-plugin` plugin, but it was adding files in the `dist/src` folder, while my files trying to import the error were in the `dist` folder, therefore couldn't find the file.
+- I realized after everything was over, that the error was due to `tsc`, which was run after esbuild, but during the process, I got stuck here, decided it wasn't worth the time to fix.
+
+### 4. Back to Rollup
+- ChatGPT and Gemini were not helpful in debugging esbuild, so I tried GPT's solution for the Rollup config.
+- I ran into this error:
+```
+export { AnnouncementsBar } from './custom/AnnouncementsBar.js';
+^^^^^^
+
+SyntaxError: Unexpected token 'export'
+```
+- I tried a lot of things to get it to work, which included spending a lot of types trying to get `type: 'module'` in `package.json` to work, but my dependencies didn't support `esm`, so I dropped that.
+- I realized that the `rollup.config.js` file GPT had given me earlier used `format: 'cjs'` instead of `format: 'esm'`, so I tried that, and it worked! (*after a few more tweaks of switching back from `esm` to `commonjs`)
+- I was also stuck on this [issue](https://github.com/vercel/next.js/discussions/43577) for a while. What finally fixed it though was publishing a `canary` version to `npm` and installing that, instead of installing the local package.
+- I figured this was because the local `react` in the package, which was a `peerDependency`, was interfering with the project's `react`, even though I made sure both were the same version and `npm ls react` showed no duplicates.
+
+### Back to esbuild
+- While writing the esbuild part of this blog post, I realized what my error was coming from.
+- The reason I was getting the error was from running `tsc` after esbuild, which was adding the `js` files which had errors on top of the `.d.ts` files I wanted.
+- The reason I was running `tsc` was because `esbuild` doesn't include declaration files, and I needed types. I fixed this setting `emitDeclarationOnly: true` in the `esbuild` config.
+- I fixed this, changed `esbuild` to `cjs` too, and it worked!
+- I'm pretty sure I'm still not doing things fully right, since in my `package.json` file, my types come from the `dist`, while the main file comes from `dist/src`.
+```json
+  "exports": {
+    ".": {
+      "require": "./dist/src/index.js",
+      "import": "./dist/src/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+```
+- It works though, so I'm not spending more time on it.
+
+### Final thoughts, lessons learned
+- I learned most about `tsconfig.json` through this process. I now have a better understanding of a lot more of the settings.
+- I learned that in the end, Rollup and esbuild are similar, if my config doesn't work with one, it probably won't work in the other.
+- The final solution of the last issue I spent a lot of time dealing with was super simple, I just had to switch from `esm` to `cjs` in my Rollup and esbuild config.
+- I learned more about esm vs commonjs in the process, such as how the requirements for using `esm` are quite strict, and many libraries don't support it.
+- I should be better at identifying whether a problem is an `esm` vs `cjs` problem now.
+
+### Some proposed solutions so I don't spiral into the XY problem again
+1. Write down the original problem
+1. Take breaks

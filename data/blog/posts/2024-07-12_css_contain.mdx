@@ -1,0 +1,29 @@
+---
+title: 'Screen wrapper using CSS only, no IFrames'
+date: '2024-07-11'
+authors: ['ychris']
+localeid: '2024-07-11_fixed_space'
+summary: "force element to take a wrapper as it's screen, with vh and vw as the wrapper size"
+tags: ['css', 'react', 'code']
+draft: true
+---
+
+TLDR: used CSS contains
+
+This is more of a bullet-point summary of this article: https://css-tricks.com/almanac/properties/c/contain/
+I will refer the an element with `contains` not `none` as "this element"
+
+- descendants independent of document tree
+- descendants will think of this element as the document tree
+- It will act fully as if the element is the document tree if you do `contain: strict`, but you can also slice up parts of the functionality to only apply certain aspects
+- `layout`, `paint`, `size`, and  ~~`style`~~ are the different aspects
+- `layout` affects whether other elements outside of this element can see this??? idk
+- `vh` and `vw` of descendents will be relative to this element with `contains` with `size` set
+
+Default is `contain: none`
+
+##### Shorthands
+`contain: content` == `contain: layout paint`
+`contain: strict` == `contain: layout paint size`
+
+#### Layout

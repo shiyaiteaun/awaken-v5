@@ -1,0 +1,44 @@
+---
+title: 'Fixing Typescript being slow'
+date: '2024-08-01'
+authors: ['ychris']
+localeid: '2024-08-01_typescript-slow-googleapis'
+summary: "Here's how I fixed Typescript being slow for my Next.js project"
+tags: ['typescript', 'slow', 'vscode']
+draft: true
+---
+
+Typescript had been very slow for a while for my project [Planda](https://planda.ca), and I finally decided to address it.
+I've documented here what I tried in the process, and what fixed it.
+
+TLDR: The problem was `googleapis`, installing an individual package (`@googleapis/calendar`) instead of the entire `googleapis` significantly sped things up.
+
+### 1. TS config [fail]
+- First I tried excluding all files that I didn't necessarily need in `exclude` in `tsconfig.json`, and removing anything unnecessary from `include`.
+- There wasn't very much to change, so unsurprisingly this didn't work.
+
+### 2. VS code Extension Bisect [fail]
+- First tried Extension Bisect, found from this [stackoverflow post](https://stackoverflow.com/questions/66013318/how-do-i-speed-up-typescript-intelisense-in-vscode)
+- To start this do <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>, and type ` Start Extension Bisect`
+- It didn't work, so I was pretty sure VScode extensions weren't the problem
+
+### 3. VS code setttings [fail]
+- Used settings from this [reddit post](https://www.reddit.com/r/vscode/comments/trjn3z/comment/i2mvlu9/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
+- Still slow
+
+### 4. webtreemap [PASS]
+- Google search for "typescript slow for large files" lead me to this [article](https://effectivetypescript.com/2022/07/30/treemap-for-source-files/)
+- Tried it, and found out `googleapis` took up a HUGE amount of space.
+- Google search for "google apis typescript slow" lead me to this [Github issue](https://github.com/googleapis/google-api-nodejs-client/issues/2346), where I found a suggestion for installing individual packages instead of the entire `googleapis` package
+- Found `@googleapis/calendar` on `npm`, so installed it, uninstalled `googleapis`, did all the replacements, and it worked!
+- `googleapis` was also the reason found in the [article](https://effectivetypescript.com/2022/07/30/treemap-for-source-files/), and in their case switching to the individual packages sped things up by 20%. I didn't measure my speedup, but I could definetly feel the speed increase.
+
+### Final thoughts
+Speed has definitely improved, but it's still quite slow. I'll keep looking for ways to speed it up, and update this post if I find anything.
+
+### Some relevant links
+[https://www.npmjs.com/package/webtreemap-cli](https://www.npmjs.com/package/webtreemap-cli)
+[https://effectivetypescript.com/2022/07/30/treemap-for-source-files/](https://effectivetypescript.com/2022/07/30/treemap-for-source-files/)
+
+### Next steps for Planda
+V3 is coming out late August 2024! Stay tuned for more updates.

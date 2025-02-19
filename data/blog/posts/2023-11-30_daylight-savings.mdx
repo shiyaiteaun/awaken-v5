@@ -1,0 +1,33 @@
+---
+title: 'Daylight savings for cron'
+date: '2023-11-30'
+authors: ['ychris']
+localeid: '2023-11-30_daylight-savings'
+summary: 'How I handled daylight savings for recurring events on Planda.'
+tags: ['planda']
+---
+
+## The Problem
+For the longest time, I couldn't figure out how to handle daylight savings for recurring events on Planda's calendar. Because recurring events were stored as UTC crons, and UTC isn't affected by daylight savings, I couldn't shift only certain dates an hour earlier or later, while leaving the rest. For the previous daylight savings, I ran script to move all crons an hour up or down, but this caused the events in the past to have the wrong dates.
+
+### How I handle crons
+I use [event-cron-parser](https://www.npmjs.com/package/event-cron-parser), an npm library I built off of [aws-cron-parser](https://github.com/beemhq/aws-cron-parser). [Here's](https://planda.ca/blog/posts/local-cron) an article about how I've built it to work with local dates and handle events with durations.
+
+## My solution
+I generate local dates from an AWS cron using the `next()` and `range()` functions from `EventCronParser`. Since `range()` uses `next()` internally, I only needed to make sure that `next()` returned a date properly adjusted for daylight savings. Note that for this to work, the crons need to be sent to the client, and the dates must be generated there, in order to access local dates.
+`EventCronParser` takes in a start date for the cron. I used this start date as a reference point for daylight savings. I checked whether the date generated internally from the parser fell into the same timezone as the start date.
+
+```js
+date.getTimezoneOffset() - new Date(parsedCron.start).getTimezoneOffset()
+```
+
+If they are in the same timezone, I return the date as is. Otherwise, I shift the date according to the timezone difference.
+
+### Benefits of this approach
+- It works!
+- Doesn't require any extra work from users of the `event-cron-parser` library, since the library deals with it automatically when working with local dates.
+
+### Drawbacks
+- Local time is only accessible on the client-side, therefore to get dates adjusted for daylight savings, they must be generated on the client, in order to access local dates. A possible future solution would be to store timezones either directly in the cron or take a specific timezone in as a parameter, and adjust the dates according to the timezone given.
+- Required me to wrap all dates within `event-cron-parser` with a function to properly adjust it for daylight savings. Very easy to miss places, may make extending this library more difficult.
+- Spent some time dealing with edge cases caused by this implementation, there is likely still a lot I haven't found yet.
