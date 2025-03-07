@@ -24,44 +24,21 @@ export const SearchProvider = ({ children }: SearchProviderProps) => {
     .filter((a) => a.language === locale)
     .sort((a, b) => (a.default === b.default ? 0 : a.default ? -1 : 1)) as Authors[]
 
-  // Create search items for each author
-  const authorSearchItems = authors.map((author) => {
-    const { name, slug } = author
-    return {
-      id: slug,
-      name: name,
+  // Replace with simple about action
+  const authorsActions = [
+    {
+      id: 'about',
+      name: locale === fallbackLng ? 'About' : 'À propos',
       keywords: '',
-      shortcut: [],
-      section: locale === fallbackLng ? 'Authors' : 'Auteurs',
-      perform: () => router.push(`/${slug}`),
+      shortcut: ['a'],
+      section: locale === fallbackLng ? 'Navigate' : 'Naviguer',
+      perform: () => router.push(`/${locale}/about`),
       icon: (
         <i>
           <AboutIcon />
         </i>
       ),
     }
-  })
-
-  const showAuthorsSearch = siteMetadata.multiauthors
-  const authorsActions = [
-    ...(showAuthorsSearch ? authorSearchItems : []), // Add author search items if multiauthors is true
-    ...(showAuthorsSearch
-      ? [] // Exclude "About" section if multiauthors is true
-      : [
-          {
-            id: 'about',
-            name: locale === fallbackLng ? 'About' : 'À propos',
-            keywords: '',
-            shortcut: ['a'],
-            section: locale === fallbackLng ? 'Navigate' : 'Naviguer',
-            perform: () => router.push(`/${locale}/about`),
-            icon: (
-              <i>
-                <AboutIcon />
-              </i>
-            ),
-          },
-        ]),
   ]
   /* issue when using regular translations, this is a workaround to show how to implement section titles */
   const navigationSection = locale === fallbackLng ? 'Navigate' : 'Naviguer'

@@ -1,0 +1,20 @@
+{
+  "title": "Latest News",
+  "all": "All",
+  "events": "Events",
+  "workshops": "Workshops",
+  "achievements": "Achievements",
+  "comingSoon": "Coming Soon",
+  "description": "Stay tuned for the latest news and updates about our activities. We're working on bringing you exciting content!",
+  "subtitle": "Stay up to date with our latest news, events, and community activities",
+  "sections": {
+    "news": {
+      "title": "Latest News",
+      "description": "Recent updates and announcements"
+    },
+    "events": {
+      "title": "Upcoming Events",
+      "description": "Join our upcoming workshops and activities"
+    }
+  }
+} 

@@ -1,0 +1,45 @@
+{
+  "title": "Services",
+  "description": "Our Services",
+  "subtitle": "Find detailed information about our services here",
+  "school_partnership": {
+    "title": "School Partnership",
+    "description": "Partner with us to bring coding education to your school",
+    "features": [
+      "Customized curriculum integration",
+      "Teacher training and support",
+      "Access to Padma platform",
+      "Regular progress reports"
+    ]
+  },
+  "club_partnership": {
+    "title": "Club Partnership",
+    "description": "Start a coding club at your institution",
+    "features": [
+      "Club management guidelines",
+      "Project-based learning materials",
+      "Mentorship support",
+      "Inter-club activities"
+    ]
+  },
+  "workshops": {
+    "title": "Workshops",
+    "description": "Hands-on coding workshops for students and teachers",
+    "features": [
+      "Beginner to advanced levels",
+      "Practical coding exercises",
+      "Interactive learning sessions",
+      "Certificate of completion"
+    ]
+  },
+  "courses": {
+    "title": "Courses",
+    "description": "Structured coding courses for different skill levels",
+    "features": [
+      "Self-paced learning",
+      "Comprehensive curriculum",
+      "Hands-on projects",
+      "Assessment and feedback"
+    ]
+  }
+} 

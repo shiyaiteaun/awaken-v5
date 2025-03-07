@@ -2,8 +2,8 @@
 const siteMetadata = {
   title: 'Blog',
   authors: ['ychris'],
-  headerTitle: 'Planda+Mortals Blog',
-  description: "A blog for Planda, Celebrate This Mortal, and Christina's coding journey",
+  headerTitle: 'Awaken',
+  description: "ဒီနေရာက Description လို့တော့ပြောတာပဲ",
   language: 'en',
   theme: 'system', // system, dark or light
   siteUrl: 'https://blog.planda.ca',

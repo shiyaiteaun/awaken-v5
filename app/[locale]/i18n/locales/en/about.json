@@ -1,3 +1,41 @@
 {
-  "about": "About"
+  "about": "About",
+  "title": "About Us",
+  "mission": {
+    "title": "Mission",
+    "content": "At Awaken, our mission is to make coding education accessible and inclusive for all learners, especially in underrepresented communities. Through innovative tools like Padma, we empower students and educators to embrace computational thinking and problem-solving in their native languages."
+  },
+  "vision": {
+    "title": "Vision",
+    "content": "We envision a world where everyone, regardless of their background, has the opportunity to learn programming in a way that is intuitive, culturally relevant, and accessible offline. By fostering creativity through our Padma coding tool, we aim to nurture the next generation of innovators."
+  },
+  "team": {
+    "title": "Our Team",
+    "members": {
+      "founder": {
+        "name": "Yan Aung Moe",
+        "role": "Founder & Team Lead"
+      },
+      "training": {
+        "name": "Thiha Lin",
+        "role": "Training Manager"
+      },
+      "tech": {
+        "name": "Kaung Moon San",
+        "role": "Project Coordinator & Tech Lead"
+      },
+      "marketing": {
+        "name": "Kaung Set Min",
+        "role": "Social Impact Marketing Lead"
+      },
+      "research": {
+        "name": "Shine Thet Aung",
+        "role": "R&D Head"
+      },
+      "finance": {
+        "name": "Thida Tun",
+        "role": "Finance Manager"
+      }
+    }
+  }
 }

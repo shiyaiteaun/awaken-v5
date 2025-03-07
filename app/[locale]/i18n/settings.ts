@@ -1,17 +1,15 @@
 import type { InitOptions } from 'i18next'
-import { fallbackLng } from './locales'
 
-// export const locales = [fallbackLng, secondLng] as const
-export const locales = [fallbackLng] as const
+export const fallbackLng = 'en'
+export const locales = ['en', 'my'] as const
 export type LocaleTypes = (typeof locales)[number]
 export const defaultNS = 'common'
 
-export function getOptions(locale = fallbackLng, ns = defaultNS): InitOptions {
+export function getOptions(lng = fallbackLng, ns = defaultNS): InitOptions {
   return {
-    debug: true,
     supportedLngs: locales,
     fallbackLng,
-    lng: locale,
+    lng,
     fallbackNS: defaultNS,
     defaultNS,
     ns,

@@ -1,0 +1,22 @@
+{
+  "title": "Contact Us",
+  "description": "Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+  "info": {
+    "title": "Contact Information",
+    "address": {
+      "title": "Address",
+      "value": "123 Innovation Street, Yangon, Myanmar"
+    },
+    "email": {
+      "title": "Email",
+      "value": "info@awakenmyanmar.org"
+    },
+    "phone": {
+      "title": "Phone",
+      "value": "+95 1 234 5678"
+    }
+  },
+  "form": {
+    "title": "Send us a Message"
+  }
+} 
