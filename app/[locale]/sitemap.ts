@@ -1,5 +1,8 @@
 import { MetadataRoute } from 'next'
-import { allBlogs } from 'contentlayer/generated'
+// Remove or comment out any imports from contentlayer/generated
+// For example:
+// import { allBlogs } from 'contentlayer/generated'
+// Replace with alternative data source or mock data as needed
 import siteMetadata from '@/data/siteMetadata'
 import { fallbackLng } from './i18n/locales'
 import { locales } from './i18n/settings'
